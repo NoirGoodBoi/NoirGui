@@ -1,167 +1,236 @@
-local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
-
+local Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Rayfield/main/source.lua"))()
 local Window = Rayfield:CreateWindow({
-   Name = "🌌 NoirGoodBoi Hub",
-   LoadingTitle = "Đợi xíu đang nấu GUI...",
-   LoadingSubtitle = "by NoirGoodBoi 😈",
-   ConfigurationSaving = {
-      Enabled = true,
-      FolderName = "NoirGUI",
-      FileName = "NoirHub"
-   },
-   KeySystem = false
+    Name = "NoirHub V6",
+    LoadingTitle = "NoirHub Loading",
+    LoadingSubtitle = "Tung hoành roblox 😎",
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "NoirHubV6",
+        FileName = "NoirSettings"
+    },
+    Discord = {
+        Enabled = false
+    },
+    KeySystem = false
 })
 
--- Tab Di chuyển
-local TabMovement = Window:CreateTab("🚀 Di chuyển", 4483362458)
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local savedAnimationPack = nil
+local savedOutfits = {}
 
-local noclipEnabled = false
-TabMovement:CreateToggle({
-   Name = "Noclip (anti void)",
-   CurrentValue = false,
-   Callback = function(Value)
-      noclipEnabled = Value
-      if Value then
-         game:GetService("RunService").Stepped:Connect(function()
-            if noclipEnabled and game.Players.LocalPlayer.Character then
-               for _, part in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
-                  if part:IsA("BasePart") then
-                     part.CanCollide = false
-                  end
-               end
+local Tab1 = Window:CreateTab("🚀 Di chuyển", 4483362458)
+local Tab2 = Window:CreateTab("🎯 Combat & ESP", 4483362458)
+local Tab3 = Window:CreateTab("💀 to6 by Noir", 4483362458)
+local Tab4 = Window:CreateTab("👑 Điều khiển", 4483362458)
+local Tab5 = Window:CreateTab("🎭 Animation", 4483362458)
+local Tab6 = Window:CreateTab("👕 Outfit", 4483362458)
+
+Tab1:CreateButton({
+    Name = "🧚 Fly (VehicleFly style)",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/GhostPlayer352/Test4/main/Vehicle%20Fly%20Gui"))()
+    end
+})
+
+Tab1:CreateToggle({
+    Name = "🧱 NoClip + AntiVoid",
+    CurrentValue = false,
+    Callback = function(state)
+        if state then
+            game:GetService("RunService").Stepped:Connect(function()
+                for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
+                    if v:IsA("BasePart") then
+                        v.CanCollide = false
+                    end
+                end
+                if LocalPlayer.Character.HumanoidRootPart.Position.Y < -10 then
+                    LocalPlayer.Character.HumanoidRootPart.Velocity = Vector3.new(0, 50, 0)
+                end
+            end)
+        end
+    end
+})
+
+Tab1:CreateToggle({
+    Name = "👻 Invisible",
+    CurrentValue = false,
+    Callback = function(state)
+        for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
+            if v:IsA("BasePart") then
+                v.Transparency = state and 1 or 0
             end
-         end)
-      end
-   end
+        end
+    end
 })
 
-TabMovement:CreateToggle({
-   Name = "Invisible",
-   CurrentValue = false,
-   Callback = function(v)
-      local char = game.Players.LocalPlayer.Character
-      if v and char then
-         for _, part in pairs(char:GetDescendants()) do
-            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-               part.Transparency = 1
+Tab2:CreateButton({
+    Name = "🎯 Aimbot (đầu)",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ZepsyyCodes/FE/main/Aimbot"))()
+    end
+})
+
+Tab2:CreateButton({
+    Name = "📍 ESP Tên + Highlight (Xanh)",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/itsnoirdev/ESP-GreenHighlight/main/ESP.lua"))()
+    end
+})
+
+Tab3:CreateToggle({
+    Name = "🗯️ Tự động spam toxic",
+    CurrentValue = false,
+    Callback = function(state)
+        if state then
+            while wait(3) do
+                local msg = "Cry about it 😭"
+                game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(msg, "All")
             end
-         end
-      elseif char then
-         for _, part in pairs(char:GetDescendants()) do
-            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-               part.Transparency = 0
+        end
+    end
+})
+
+Tab3:CreateInput({
+    Name = "Custom spam text",
+    PlaceholderText = "Nhập câu cần spam",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(text)
+        game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(text, "All")
+    end
+})
+
+Tab4:CreateInput({
+    Name = "Nhập tên gần đúng",
+    PlaceholderText = "Ví dụ: djdb",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(input)
+        for _, plr in pairs(Players:GetPlayers()) do
+            if string.find(string.lower(plr.Name), string.lower(input)) then
+                Tab4:CreateButton({
+                    Name = "💀 Kill " .. plr.Name,
+                    Callback = function()
+                        plr.Character:BreakJoints()
+                    end
+                })
+
+                Tab4:CreateButton({
+    Name = "💣 Tự nổ (văng tất cả)",
+    Callback = function()
+        local root = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local distance = (player.Character.HumanoidRootPart.Position - root.Position).magnitude
+                if distance < 25 then
+                    player.Character.HumanoidRootPart.Velocity = (player.Character.HumanoidRootPart.Position - root.Position).Unit * 150
+                end
             end
-         end
-      end
-   end
+        end
+        LocalPlayer.Character:BreakJoints()
+    end
+})
 })
 
-TabMovement:CreateButton({
-   Name = "Bay (mở GUI bay riêng)",
-   Callback = function()
-      loadstring(game:HttpGet('https://raw.githubusercontent.com/GhostPlayer352/Test4/main/Vehicle%20Fly%20Gui'))()
-   end
+Tab5:CreateDropdown({
+    Name = "🎭 Emote",
+    Options = {"Griddy", "Cartwheel", "Moon Dance", "Moon Dance (Nhanh)", "Tập bơi", "Tập bơi (Nhanh)"},
+    Callback = function(animName)
+        local id = "rbxassetid://"
+        if animName == "Griddy" then id = id.."10727422650"
+        elseif animName == "Moon Dance" then id = id.."8568578708"
+        elseif animName == "Moon Dance (Nhanh)" then id = id.."14413564813"
+        elseif animName == "Cartwheel" then id = id.."7828414984"
+        elseif animName == "Tập bơi" then id = id.."11830420595"
+        elseif animName == "Tập bơi (Nhanh)" then id = id.."11831111885" end
+
+        local anim = Instance.new("Animation")
+        anim.AnimationId = id
+        local track = humanoid:LoadAnimation(anim)
+        track:Play()
+    end
 })
 
--- Tab Combat & ESP
-local TabCombat = Window:CreateTab("🎯 Combat & ESP", 4483362458)
-
-TabCombat:CreateButton({
-   Name = "Aimbot (head)",
-   Callback = function()
-      loadstring(game:HttpGet('https://raw.githubusercontent.com/Exunys/Aimbot-V2/main/Resources/Scripts/Aimbot%20V2.lua'))()
-   end
+Tab5:CreateToggle({
+    Name = "🔁 Loop Emote",
+    CurrentValue = false,
+    Callback = function(loop)
+        -- sẽ thêm sau nếu cần
+    end
 })
 
-TabCombat:CreateToggle({
-   Name = "Định vị tên (có khoảng cách)",
-   CurrentValue = false,
-   Callback = function(v)
-      _G.ShowNames = v
-      loadstring(game:HttpGet("https://raw.githubusercontent.com/ic3w0lf22/Unnamed-ESP/master/UnnamedESP.lua"))()
-   end
+Tab5:CreateDropdown({
+    Name = "📦 Animation Pack",
+    Options = {"Levitate", "Zombie", "Stylish", "Ninja"},
+    Callback = function(pack)
+        local packs = {
+            ["Levitate"] = 10180612145,
+            ["Zombie"] = 6160882117,
+            ["Stylish"] = 6161367901,
+            ["Ninja"] = 6561197213
+        }
+        savedAnimationPack = packs[pack]
+        local desc = Players:GetHumanoidDescriptionFromUserId(LocalPlayer.UserId)
+        desc.AnimationPack = "rbxassetid://"..packs[pack]
+        humanoid:ApplyDescription(desc)
+    end
 })
 
-TabCombat:CreateToggle({
-   Name = "Highlight người chơi",
-   CurrentValue = false,
-   Callback = function(v)
-      _G.HighlightESP = v
-      loadstring(game:HttpGet("https://raw.githubusercontent.com/Ryn06/RobloxScripts/main/HighlightESP.lua"))()
-   end
+Tab5:CreateToggle({
+    Name = "💾 Ghi nhớ animation pack khi chết",
+    CurrentValue = true,
+    Callback = function() end
 })
 
--- Tab to6 by Noir
-local TabToxic = Window:CreateTab("💀 to6 by Noir", 4483362458)
+LocalPlayer.CharacterAdded:Connect(function(char)
+    if savedAnimationPack then
+        local hum = char:WaitForChild("Humanoid")
+        local desc = Players:GetHumanoidDescriptionFromUserId(LocalPlayer.UserId)
+        desc.AnimationPack = "rbxassetid://"..savedAnimationPack
+        hum:ApplyDescription(desc)
+    end
+end)
 
-local toxicEnabled = false
-local toxicLines = {
-   "Alt + F4 now 👋",
-   "Cry harder 💦",
-   "Skill issue detected 😎",
-   "That's what I thought 😂",
-   "No cap you bad 🤡"
-}
-
-TabToxic:CreateToggle({
-   Name = "Auto spam chat toxic",
-   CurrentValue = false,
-   Callback = function(v)
-      toxicEnabled = v
-      task.spawn(function()
-         while toxicEnabled do
-            local msg = toxicLines[math.random(1, #toxicLines)]
-            game.ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(msg, "All")
-            wait(5)
-         end
-      end)
-   end
+Tab6:CreateInput({
+    Name = "📥 Nhập UserId để copy outfit",
+    PlaceholderText = "VD: 1 (bacon) hoặc 261",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(uid)
+        table.insert(savedOutfits, uid)
+        local desc = Players:GetHumanoidDescriptionFromUserId(tonumber(uid))
+        humanoid:ApplyDescription(desc)
+    end
 })
 
-TabToxic:CreateParagraph({Title = "📜 Danh sách câu sẽ chat:", Content = table.concat(toxicLines, "\n")})
-
-local customSpam = ""
-local customOn = false
-TabToxic:CreateInput({
-   Name = "Nhập câu spam riêng",
-   PlaceholderText = "Ví dụ: ez game noobs 😈",
-   RemoveTextAfterFocusLost = false,
-   Callback = function(txt)
-      customSpam = txt
-   end
+Tab6:CreateDropdown({
+    Name = "📜 Lịch sử đã từng copy",
+    Options = savedOutfits,
+    Callback = function(uid)
+        local desc = Players:GetHumanoidDescriptionFromUserId(tonumber(uid))
+        humanoid:ApplyDescription(desc)
+    end
 })
 
-TabToxic:CreateToggle({
-   Name = "Bật spam câu tuỳ chỉnh",
-   CurrentValue = false,
-   Callback = function(v)
-      customOn = v
-      task.spawn(function()
-         while customOn do
-            if customSpam ~= "" then
-               game.ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(customSpam, "All")
-            end
-            wait(5)
-         end
-      end)
-   end
+Tab6:CreateDropdown({
+    Name = "🎭 Outfit preset",
+    Options = {"👑 Admin Giả", "🤑 Tryhard Rich Kid", "🤣 Noob Troll", "🧍 Mặc đồ trống"},
+    Callback = function(preset)
+        local ids = {
+            ["👑 Admin Giả"] = 261,
+            ["🤑 Tryhard Rich Kid"] = 139221015,
+            ["🤣 Noob Troll"] = 1,
+            ["🧍 Mặc đồ trống"] = 0
+        }
+        local desc = Players:GetHumanoidDescriptionFromUserId(ids[preset])
+        humanoid:ApplyDescription(desc)
+    end
 })
 
-TabToxic:CreateButton({
-   Name = "Spam thử 1 lần",
-   Callback = function()
-      if customSpam ~= "" then
-         game.ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(customSpam, "All")
-      end
-   end
-})
-
-TabToxic:CreateButton({
-   Name = "💣 Tự nổ (xoá character)",
-   Callback = function()
-      local char = game.Players.LocalPlayer.Character
-      if char then
-         char:BreakJoints()
-      end
-   end
+Tab6:CreateButton({
+    Name = "🔄 Reset outfit gốc",
+    Callback = function()
+        local desc = Players:GetHumanoidDescriptionFromUserId(LocalPlayer.UserId)
+        humanoid:ApplyDescription(desc)
+    end
 })
