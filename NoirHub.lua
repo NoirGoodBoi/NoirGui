@@ -16,6 +16,23 @@ Main.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Main.BorderSizePixel = 0
 Main.Parent = ScreenGui
 
+local Close = Instance.new("TextButton")
+Close.Size = UDim2.new(0, 30, 0, 30)
+Close.Position = UDim2.new(1, -35, 0, 5)
+Close.Text = "X"
+Close.TextColor3 = Color3.new(1,1,1)
+Close.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
+Close.Parent = Main
+Close.MouseButton1Click:Connect(function()
+    ScreenGui.Enabled = not ScreenGui.Enabled
+end)
+
+local TabBar = Instance.new("Frame")
+TabBar.Size = UDim2.new(1, 0, 0, 30)
+TabBar.Position = UDim2.new(0, 0, 0, 0)
+TabBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+TabBar.Parent = Main
+
 local Tabs = {}
 local CurrentTab = nil
 
@@ -25,11 +42,11 @@ local function createTab(name)
     Button.Text = name
     Button.TextColor3 = Color3.new(1, 1, 1)
     Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    Button.Parent = Main
+    Button.Parent = TabBar
 
     local TabFrame = Instance.new("Frame")
-    TabFrame.Size = UDim2.new(1, -10, 1, -50)
-    TabFrame.Position = UDim2.new(0, 5, 0, 45)
+    TabFrame.Size = UDim2.new(1, -10, 1, -40)
+    TabFrame.Position = UDim2.new(0, 5, 0, 35)
     TabFrame.BackgroundTransparency = 1
     TabFrame.Visible = false
     TabFrame.Parent = Main
@@ -40,7 +57,8 @@ local function createTab(name)
         CurrentTab = TabFrame
     end)
 
-    Tabs[#Tabs+1] = {Button = Button, Frame = TabFrame}
+    table.insert(Tabs, {Button = Button, Frame = TabFrame})
+    Button.Position = UDim2.new(0, (#Tabs-1)*85 + 5, 0, 0)
     return TabFrame
 end
 
@@ -155,18 +173,4 @@ addToggle(Tab3, "Spam To6", function(state)
             task.wait(2)
         end
     end)
-end)
-
-local Tab4 = createTab("Điều khiển")
-addButton(Tab4, "Tự nổ (văng)" , function()
-    local root = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local distance = (player.Character.HumanoidRootPart.Position - root.Position).magnitude
-            if distance < 25 then
-                player.Character.HumanoidRootPart.Velocity = (player.Character.HumanoidRootPart.Position - root.Position).Unit * 150
-            end
-        end
-    end
-    LocalPlayer.Character:BreakJoints()
 end)
