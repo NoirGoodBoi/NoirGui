@@ -1,176 +1,214 @@
+local Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Rayfield/main/source.lua"))()
+local Window = Rayfield:CreateWindow({
+    Name = "NoirHub V6",
+    LoadingTitle = "NoirHub Loading",
+    LoadingSubtitle = "Tung hoành roblox 😎",
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "NoirHubV6",
+        FileName = "NoirSettings"
+    },
+    Discord = {
+        Enabled = false
+    },
+    KeySystem = false
+})
+
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local UIS = game:GetService("UserInputService")
+local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-local CoreGui = game:GetService("CoreGui")
-local StarterGui = game:GetService("StarterGui")
+local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local clone = nil
+local controllingClone = false
+local originalCameraSubject = workspace.CurrentCamera.CameraSubject
 
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Parent = CoreGui
-ScreenGui.Name = "NoirHubGui"
+local Tab1 = Window:CreateTab("🕹 Di chuyển", 4483362458)
 
-local Main = Instance.new("Frame")
-Main.Size = UDim2.new(0, 400, 0, 300)
-Main.Position = UDim2.new(0.5, -200, 0.5, -150)
-Main.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Main.BorderSizePixel = 0
-Main.Parent = ScreenGui
-
-local Close = Instance.new("TextButton")
-Close.Size = UDim2.new(0, 30, 0, 30)
-Close.Position = UDim2.new(1, -35, 0, 5)
-Close.Text = "X"
-Close.TextColor3 = Color3.new(1,1,1)
-Close.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
-Close.Parent = Main
-Close.MouseButton1Click:Connect(function()
-    ScreenGui.Enabled = not ScreenGui.Enabled
-end)
-
-local TabBar = Instance.new("Frame")
-TabBar.Size = UDim2.new(1, 0, 0, 30)
-TabBar.Position = UDim2.new(0, 0, 0, 0)
-TabBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-TabBar.Parent = Main
-
-local Tabs = {}
-local CurrentTab = nil
-
-local function createTab(name)
-    local Button = Instance.new("TextButton")
-    Button.Size = UDim2.new(0, 80, 0, 30)
-    Button.Text = name
-    Button.TextColor3 = Color3.new(1, 1, 1)
-    Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    Button.Parent = TabBar
-
-    local TabFrame = Instance.new("Frame")
-    TabFrame.Size = UDim2.new(1, -10, 1, -40)
-    TabFrame.Position = UDim2.new(0, 5, 0, 35)
-    TabFrame.BackgroundTransparency = 1
-    TabFrame.Visible = false
-    TabFrame.Parent = Main
-
-    Button.MouseButton1Click:Connect(function()
-        if CurrentTab then CurrentTab.Visible = false end
-        TabFrame.Visible = true
-        CurrentTab = TabFrame
-    end)
-
-    table.insert(Tabs, {Button = Button, Frame = TabFrame})
-    Button.Position = UDim2.new(0, (#Tabs-1)*85 + 5, 0, 0)
-    return TabFrame
-end
-
-local function addToggle(parent, text, callback)
-    local Toggle = Instance.new("TextButton")
-    Toggle.Size = UDim2.new(0, 180, 0, 30)
-    Toggle.Text = text .. ": OFF"
-    Toggle.TextColor3 = Color3.new(1, 1, 1)
-    Toggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-    Toggle.Parent = parent
-
-    local state = false
-    Toggle.MouseButton1Click:Connect(function()
-        state = not state
-        Toggle.Text = text .. ": " .. (state and "ON" or "OFF")
-        callback(state)
-    end)
-end
-
-local function addButton(parent, text, callback)
-    local Button = Instance.new("TextButton")
-    Button.Size = UDim2.new(0, 180, 0, 30)
-    Button.Text = text
-    Button.TextColor3 = Color3.new(1, 1, 1)
-    Button.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-    Button.Parent = parent
-    Button.MouseButton1Click:Connect(callback)
-end
-
-local Tab1 = createTab("Di chuyển")
-addToggle(Tab1, "No Clip", function(state)
-    RunService.Stepped:Connect(function()
-        if state and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            LocalPlayer.Character.Humanoid:ChangeState(11)
+Tab1:CreateToggle({
+    Name = "🏃‍♂️ Infinite Jump",
+    CurrentValue = false,
+    Callback = function(Value)
+        if Value then
+            infiniteJumpConn = UserInputService.JumpRequest:Connect(function()
+                LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+            end)
+        else
+            if infiniteJumpConn then infiniteJumpConn:Disconnect() end
         end
-    end)
-end)
+    end
+})
 
-addToggle(Tab1, "Fly", function(state)
-    if state then
+Tab1:CreateToggle({
+    Name = "🚶‍♂️ Tăng tốc độ",
+    CurrentValue = false,
+    Callback = function(val)
+        if val then
+            humanoid.WalkSpeed = speedVal or 32
+        else
+            humanoid.WalkSpeed = 16
+        end
+    end
+})
+
+Tab1:CreateSlider({
+    Name = "🔧 Tốc độ chạy",
+    Range = {16, 120},
+    Increment = 1,
+    CurrentValue = 32,
+    Callback = function(v)
+        speedVal = v
+        if humanoid.WalkSpeed > 16 then
+            humanoid.WalkSpeed = speedVal
+        end
+    end
+})
+
+Tab1:CreateButton({
+    Name = "🛸 Bay (bấm để bật GUI bay)",
+    Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/GhostPlayer352/Test4/main/Vehicle%20Fly%20Gui"))()
     end
-end)
+})
 
-addToggle(Tab1, "Infinite Jump", function(state)
-    UIS.JumpRequest:Connect(function()
-        if state and LocalPlayer.Character then
-            LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
-        end
-    end)
-end)
-
-local Tab2 = createTab("Aim & ESP")
-addToggle(Tab2, "Aimbot", function(state)
-    local Camera = workspace.CurrentCamera
-    RunService.RenderStepped:Connect(function()
-        if state then
-            local closest = nil
-            local shortest = math.huge
-            for _, p in pairs(Players:GetPlayers()) do
-                if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") then
-                    local pos, onScreen = Camera:WorldToViewportPoint(p.Character.Head.Position)
-                    if onScreen then
-                        local dist = (Vector2.new(pos.X, pos.Y) - Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)).Magnitude
-                        if dist < shortest then
-                            shortest = dist
-                            closest = p
-                        end
+Tab1:CreateToggle({
+    Name = "🫥 Invisible (ẩn khỏi hitbox)",
+    CurrentValue = false,
+    Callback = function(val)
+        if val then
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                    part.Transparency = 1
+                    if part:FindFirstChildOfClass("Decal") then
+                        part:FindFirstChildOfClass("Decal").Transparency = 1
                     end
                 end
             end
-            if closest then
-                Camera.CFrame = CFrame.new(Camera.CFrame.Position, closest.Character.Head.Position)
-            end
-        end
-    end)
-end)
-
-addToggle(Tab2, "ESP", function(state)
-    for _, v in pairs(Players:GetPlayers()) do
-        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("Head") then
-            if state then
-                local esp = Instance.new("BillboardGui", v.Character)
-                esp.Name = "NoirESP"
-                esp.Size = UDim2.new(0, 100, 0, 40)
-                esp.AlwaysOnTop = true
-                local txt = Instance.new("TextLabel", esp)
-                txt.Size = UDim2.new(1,0,1,0)
-                txt.BackgroundTransparency = 1
-                txt.Text = v.Name
-                txt.TextColor3 = Color3.fromRGB(0,255,0)
-                txt.TextScaled = true
-
-                local hl = Instance.new("Highlight", v.Character)
-                hl.Name = "NoirHL"
-                hl.FillColor = Color3.fromRGB(0,255,0)
-                hl.OutlineTransparency = 1
-            else
-                if v.Character:FindFirstChild("NoirESP") then v.Character.NoirESP:Destroy() end
-                if v.Character:FindFirstChild("NoirHL") then v.Character.NoirHL:Destroy() end
+        else
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                    part.Transparency = 0
+                    if part:FindFirstChildOfClass("Decal") then
+                        part:FindFirstChildOfClass("Decal").Transparency = 0
+                    end
+                end
             end
         end
     end
-end)
+})
 
-local Tab3 = createTab("To6 by Noir")
-addToggle(Tab3, "Spam To6", function(state)
-    local messages = {"Cry about it", "Alt + F4 now", "Skill issue", "Get rekt"}
-    spawn(function()
-        while state do
-            game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(messages[math.random(#messages)], "All")
-            task.wait(2)
+local Tab2 = Window:CreateTab("👁 ESP", 4483362458)
+
+Tab2:CreateButton({
+    Name = "👀 Hiện tên và khoảng cách",
+    Callback = function()
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local billboard = Instance.new("BillboardGui", player.Character)
+                billboard.Name = "DistanceTag"
+                billboard.Size = UDim2.new(0, 200, 0, 50)
+                billboard.Adornee = player.Character.HumanoidRootPart
+                billboard.AlwaysOnTop = true
+
+                local label = Instance.new("TextLabel", billboard)
+                label.Size = UDim2.new(1, 0, 1, 0)
+                label.BackgroundTransparency = 1
+                label.TextColor3 = Color3.fromRGB(0, 255, 0)
+                label.TextStrokeTransparency = 0.5
+                label.Font = Enum.Font.GothamBold
+                label.TextScaled = true
+
+                RunService.RenderStepped:Connect(function()
+                    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                        local dist = math.floor((player.Character.HumanoidRootPart.Position - character.HumanoidRootPart.Position).Magnitude)
+                        label.Text = "[" .. dist .. "] " .. player.DisplayName
+                    end
+                end)
+            end
         end
-    end)
-end)
+    end
+})
+
+local Tab3 = Window:CreateTab("🎭 Emote", 4483362458)
+
+Tab3:CreateButton({
+    Name = "🎒 Animation Pack (R6 + R15)",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Emerson2-creator/Scripts-Roblox/main/ScriptR6/AnimGuiV2.lua"))()
+    end
+})
+
+local Tab4 = Window:CreateTab("🎽 Outfit", 4483362458)
+
+Tab4:CreateButton({
+    Name = "🎭 Mặc R6 Headless",
+    Callback = function()
+        LocalPlayer.Character.Head.Transparency = 1
+        if LocalPlayer.Character:FindFirstChild("Humanoid") then
+            LocalPlayer.Character.Humanoid.HeadScale = 0.001
+        end
+    end
+})
+
+Tab4:CreateButton({
+    Name = "🎭 Mặc R6 Korblox",
+    Callback = function()
+        local leg = LocalPlayer.Character:FindFirstChild("RightLowerLeg")
+        if leg then
+            leg:Destroy()
+        end
+    end
+})
+
+local Tab5 = Window:CreateTab("🌀 Clone & Aura", 4483362458)
+
+Tab5:CreateButton({
+    Name = "📦 Spawn Clone",
+    Callback = function()
+        if clone then clone:Destroy() end
+        clone = character:Clone()
+        clone.Name = "NoirClone"
+        clone.Parent = workspace
+        clone:SetPrimaryPartCFrame(character:GetPrimaryPartCFrame() * CFrame.new(3, 0, 0))
+
+        Tab5:CreateButton({
+            Name = "👁 Control Clone",
+            Callback = function()
+                if clone then
+                    controllingClone = true
+                    workspace.CurrentCamera.CameraSubject = clone:FindFirstChild("Humanoid")
+                    RunService:BindToRenderStep("ControlClone", Enum.RenderPriority.Input.Value, function()
+                        if not controllingClone or not clone or not clone:FindFirstChild("HumanoidRootPart") then return end
+                        local moveVector = Vector3.new()
+                        if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveVector = moveVector + Vector3.new(0, 0, -1) end
+                        if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveVector = moveVector + Vector3.new(0, 0, 1) end
+                        if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveVector = moveVector + Vector3.new(-1, 0, 0) end
+                        if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveVector = moveVector + Vector3.new(1, 0, 0) end
+                        local hrp = clone:FindFirstChild("HumanoidRootPart")
+                        if moveVector.Magnitude > 0 then
+                            hrp.CFrame = hrp.CFrame + (hrp.CFrame.LookVector * moveVector.Z + hrp.CFrame.RightVector * moveVector.X) * 0.5
+                        end
+                    end)
+                end
+            end
+        })
+    end
+})
+
+Tab5:CreateButton({
+    Name = "🌀 Slip Aura (văng xa 4x)",
+    Callback = function()
+        local root = character:FindFirstChild("HumanoidRootPart")
+        game:GetService("RunService").Stepped:Connect(function()
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    local dist = (player.Character.HumanoidRootPart.Position - root.Position).Magnitude
+                    if dist < 10 then
+                        player.Character.HumanoidRootPart.Velocity = (player.Character.HumanoidRootPart.Position - root.Position).Unit * 60
+                    end
+                end
+            end
+        end)
+    end
+})
