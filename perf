@@ -1,0 +1,49 @@
+--// SERVICES
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Stats = game:GetService("Stats")
+
+local player = Players.LocalPlayer
+
+--// GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "PingFpsDisplay"
+gui.ResetOnSpawn = false
+gui.Parent = game.CoreGui
+
+--// TEXT LABEL
+local label = Instance.new("TextLabel")
+label.Parent = gui
+label.Size = UDim2.new(0, 200, 0, 20) -- theo yêu cầu Noir
+label.AnchorPoint = Vector2.new(0.5, 0.5)
+
+-- Center X, 0.15 màn hình từ trên xuống
+label.Position = UDim2.new(0.5, 0, 0.15, 0)
+
+label.BackgroundTransparency = 1
+label.TextScaled = true
+label.Font = Enum.Font.Arcade
+label.Text = "Loading..."
+
+--// RGB
+local hue = 0
+
+--// FPS
+local fps = 0
+local last = tick()
+
+RunService.RenderStepped:Connect(function()
+    local now = tick()
+    fps = math.floor(1 / (now - last))
+    last = now
+
+    -- Ping
+    local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+
+    -- RGB chạy
+    hue = (hue + 0.005) % 1
+    label.TextColor3 = Color3.fromHSV(hue, 1, 1)
+
+    -- Text
+    label.Text = "Ping: " .. ping .. " | FPS: " .. fps
+end)
