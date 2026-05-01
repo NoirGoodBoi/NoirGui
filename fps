@@ -1,0 +1,211 @@
+-- =============================================
+-- ULTIMATE FPS BOOSTER - GIỮ JOYSTICK & JUMP BUTTON
+-- =============================================
+
+local Players = game:GetService("Players")
+local LP = Players.LocalPlayer
+local Lighting = game:GetService("Lighting")
+local Workspace = game:GetService("Workspace")
+local Settings = game:GetService("UserSettings")
+local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
+local CoreGui = game:GetService("CoreGui")
+
+-- ==================== NOTIFY ====================
+pcall(function()
+    StarterGui:SetCore("SendNotification", {
+        Title = "⚡ FPS BOOSTER",
+        Text = "Đang tối ưu... (Giữ joystick & nút jump)",
+        Duration = 2,
+    })
+end)
+
+-- ==================== SHADOW ====================
+Lighting.GlobalShadows = false
+pcall(function()
+    settings().Rendering.ShadowsEnabled = false
+end)
+
+-- ==================== TEXTURE & QUALITY ====================
+pcall(function()
+    local GraphicsSettings = Settings:GetService("UserGameSettings")
+    GraphicsSettings.GraphicsQuality = 1
+    settings().Rendering.QualityLevel = 1
+end)
+
+-- Xóa Decal, Texture (KHÔNG ảnh hưởng joystick)
+for _, obj in pairs(Workspace:GetDescendants()) do
+    if obj:IsA("Decal") or obj:IsA("Texture") then
+        pcall(function() obj:Destroy() end)
+    elseif obj:IsA("MeshPart") then
+        pcall(function() obj.TextureID = "" end)
+    end
+end
+
+-- ==================== GRASS ====================
+local Terrain = Workspace.Terrain
+if Terrain then
+    pcall(function()
+        Terrain:ReplaceMaterial(Enum.Material.Grass, Enum.Material.Dirt, Vector3.new(-4096, -1024, -4096), 8192, 2048, 8192)
+    end)
+end
+
+-- ==================== EFFECT ====================
+local function killEffects()
+    for _, obj in pairs(Workspace:GetDescendants()) do
+        if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Beam") then
+            pcall(function() obj:Destroy() end)
+        end
+    end
+end
+killEffects()
+
+Workspace.DescendantAdded:Connect(function(obj)
+    if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Beam") then
+        pcall(function() obj:Destroy() end)
+    elseif obj:IsA("Decal") or obj:IsA("Texture") then
+        pcall(function() obj:Destroy() end)
+    end
+end)
+
+-- ==================== LIGHT ====================
+for _, obj in pairs(Workspace:GetDescendants()) do
+    if obj:IsA("PointLight") or obj:IsA("SpotLight") or obj:IsA("SurfaceLight") then
+        pcall(function() obj.Enabled = false end)
+    end
+end
+
+local effectsToKill = {"BloomEffect", "ColorCorrectionEffect", "SunRaysEffect", "DepthOfFieldEffect", "BlurEffect"}
+for _, name in pairs(effectsToKill) do
+    local effect = Lighting:FindFirstChild(name)
+    if effect then
+        pcall(function() effect.Enabled = false end)
+    end
+end
+
+-- ==================== WATER ====================
+if Terrain then
+    pcall(function()
+        Terrain.WaterWaveSize = 0
+        Terrain.WaterWaveSpeed = 0
+        Terrain.WaterReflectance = 0
+        Terrain.WaterTransparency = 1
+    end)
+end
+
+-- ==================== PART OPTIMIZATION ====================
+for _, obj in pairs(Workspace:GetDescendants()) do
+    if obj:IsA("BasePart") then
+        pcall(function()
+            obj.CastShadow = false
+            obj.Material = Enum.Material.Plastic
+            obj.Reflectance = 0
+        end)
+    end
+end
+
+-- ==================== GUI - CHỈ TẮT GUI RÁC, GIỮ JOYSTICK ====================
+pcall(function()
+    -- Chỉ ẩn chat nhưng vẫn giữ joystick
+    if CoreGui:FindFirstChild("Chat") then
+        CoreGui.Chat.Enabled = false
+    end
+end)
+
+-- TẮT CÁC GUI KHÔNG CẦN THIẾT (NHƯNG GIỮ LẠI JOYSTICK & NÚT ĐIỀU KHIỂN)
+pcall(function()
+    for _, gui in pairs(LP.PlayerGui:GetChildren()) do
+        if gui:IsA("ScreenGui") then
+            local name = gui.Name:lower()
+            -- CHỈ TẮT GUI RÁC, KHÔNG TẮT joystick, jump, control, button
+            if not name:find("joystick") and not name:find("jump") and not name:find("control") and not name:find("move") and not name:find("movement") and not name:find("button") and not name:find("action") and not name:find("touch") then
+                gui.Enabled = false
+            end
+        end
+    end
+end)
+
+-- BỎ QUA CÁC GUI QUAN TRỌNG CỦA ROBLOX (CoreGui)
+pcall(function()
+    for _, gui in pairs(CoreGui:GetChildren()) do
+        if gui:IsA("ScreenGui") then
+            -- Giữ lại chat, notification, các button cần thiết
+            if gui.Name == "Chat" or gui.Name == "Notification" or gui.Name == "RobloxGui" then
+                -- Không tắt
+            else
+                gui.Enabled = false
+            end
+        end
+    end
+end)
+
+-- ==================== SOUND OFF (NHƯNG GIỮ SOUND CẦN THIẾT) ====================
+for _, obj in pairs(Workspace:GetDescendants()) do
+    if obj:IsA("Sound") then
+        pcall(function()
+            -- Chỉ tắt sound không phải của người chơi
+            if not obj.Name:lower():find("footstep") and not obj.Name:lower():find("jump") then
+                obj.Volume = 0
+                obj.Playing = false
+            end
+        end)
+    end
+end
+
+-- ==================== LIGHTING ====================
+Lighting.ClockTime = 12
+Lighting.FogStart = 9e9
+Lighting.FogEnd = 9e9
+Lighting.Brightness = 0.5
+Lighting.OutdoorAmbient = Color3.fromRGB(50, 50, 50)
+Lighting.Ambient = Color3.fromRGB(30, 30, 30)
+
+-- ==================== FPS UNCAP ====================
+pcall(function()
+    RunService:SetPreferredFPS(0)
+end)
+
+-- ==================== DYNAMIC RESOLUTION ====================
+pcall(function()
+    settings().Rendering.EnableDynamicResolution = false
+end)
+
+-- ==================== AUTO GC ====================
+task.spawn(function()
+    while task.wait(60) do
+        pcall(function() collectgarbage("collect") end)
+    end
+end)
+
+-- ==================== DUY TRÌ ====================
+task.spawn(function()
+    while task.wait(30) do
+        pcall(function()
+            settings().Rendering.QualityLevel = 1
+            Lighting.GlobalShadows = false
+            killEffects()
+        end)
+    end
+end)
+
+-- ==================== NOTIFY HOÀN TẤT ====================
+pcall(function()
+    StarterGui:SetCore("SendNotification", {
+        Title = "✅ FPS BOOSTER",
+        Text = "Đã bật! Giữ nguyên joystick & nút jump",
+        Duration = 4,
+    })
+end)
+
+print[[
+=============================================
+   🔥 FPS BOOSTER - ĐÃ CHẠY 🔥
+=============================================
+✅ Shadow: OFF
+✅ Texture: OFF
+✅ Effect: OFF
+✅ Light: OFF
+✅ GUI rác: OFF
+✅ VẪN GIỮ JOYSTICK & NÚT JUMP
+=============================================
+]]
